@@ -1,43 +1,28 @@
 import { useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import type { Habit } from '../features/habits/types';
+import { useHabits } from '../features/habits/useHabits';
 import { toDateKey } from '../lib/date';
 
 export default function HomeScreen() {
-  const [habits, setHabits] = useState<Habit[]>([]);
+  const { habits, isLoaded, addHabit, toggleHabit, removeHabit } = useHabits();
   const [title, setTitle] = useState('');
   const today = toDateKey();
 
   const doneToday = habits.filter((habit) => habit.completedDates.includes(today)).length;
   const progress = habits.length === 0 ? 0 : doneToday / habits.length;
 
-  function addHabit() {
-    const trimmed = title.trim();
-    if (!trimmed) return;
-
-    setHabits((current) => [
-      ...current,
-      { id: Date.now().toString(), title: trimmed, completedDates: [] },
-    ]);
+  function handleAdd() {
+    addHabit(title);
     setTitle('');
   }
 
-  function toggleHabit(id: string) {
-    setHabits((current) =>
-      current.map((habit) => {
-        if (habit.id !== id) return habit;
-
-        const isDone = habit.completedDates.includes(today);
-        return {
-          ...habit,
-          completedDates: isDone
-            ? habit.completedDates.filter((date) => date !== today)
-            : [...habit.completedDates, today],
-        };
-      }),
-    );
+  function confirmRemove(id: string, habitTitle: string) {
+    Alert.alert('Remover hábito', `Remover "${habitTitle}"?`, [
+      { text: 'Cancelar', style: 'cancel' },
+      { text: 'Remover', style: 'destructive', onPress: () => removeHabit(id) },
+    ]);
   }
 
   return (
@@ -60,10 +45,10 @@ export default function HomeScreen() {
           placeholderTextColor="#8b8fa3"
           value={title}
           onChangeText={setTitle}
-          onSubmitEditing={addHabit}
+          onSubmitEditing={handleAdd}
           returnKeyType="done"
         />
-        <Pressable style={styles.addButton} onPress={addHabit}>
+        <Pressable style={styles.addButton} onPress={handleAdd}>
           <Text style={styles.addButtonText}>Adicionar</Text>
         </Pressable>
       </View>
@@ -73,7 +58,9 @@ export default function HomeScreen() {
         keyExtractor={(habit) => habit.id}
         contentContainerStyle={styles.list}
         ListEmptyComponent={
-          <Text style={styles.emptyText}>Nenhum hábito ainda. Adicione o primeiro acima.</Text>
+          <Text style={styles.emptyText}>
+            {isLoaded ? 'Nenhum hábito ainda. Adicione o primeiro acima.' : 'Carregando...'}
+          </Text>
         }
         renderItem={({ item }) => {
           const isDone = item.completedDates.includes(today);
@@ -81,6 +68,7 @@ export default function HomeScreen() {
             <Pressable
               style={[styles.habitItem, isDone && styles.habitItemDone]}
               onPress={() => toggleHabit(item.id)}
+              onLongPress={() => confirmRemove(item.id, item.title)}
             >
               <Text style={styles.habitCheck}>{isDone ? '✓' : '○'}</Text>
               <Text style={[styles.habitTitle, isDone && styles.habitTitleDone]}>
