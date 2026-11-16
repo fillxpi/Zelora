@@ -39,6 +39,13 @@ npm install
 npx expo start
 ```
 
+## Testes
+
+```bash
+cd mobile
+npm test
+```
+
 Escaneie o QR code com o Expo Go.
 
 ## Roadmap
