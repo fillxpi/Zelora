@@ -1,98 +1,186 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
+import { useState } from 'react';
+import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+import type { Habit } from '../features/habits/types';
+import { toDateKey } from '../lib/date';
 
 export default function HomeScreen() {
+  const [habits, setHabits] = useState<Habit[]>([]);
+  const [title, setTitle] = useState('');
+  const today = toDateKey();
+
+  const doneToday = habits.filter((habit) => habit.completedDates.includes(today)).length;
+  const progress = habits.length === 0 ? 0 : doneToday / habits.length;
+
+  function addHabit() {
+    const trimmed = title.trim();
+    if (!trimmed) return;
+
+    setHabits((current) => [
+      ...current,
+      { id: Date.now().toString(), title: trimmed, completedDates: [] },
+    ]);
+    setTitle('');
+  }
+
+  function toggleHabit(id: string) {
+    setHabits((current) =>
+      current.map((habit) => {
+        if (habit.id !== id) return habit;
+
+        const isDone = habit.completedDates.includes(today);
+        return {
+          ...habit,
+          completedDates: isDone
+            ? habit.completedDates.filter((date) => date !== today)
+            : [...habit.completedDates, today],
+        };
+      }),
+    );
+  }
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.title}>Zelora</Text>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+      <View style={styles.progressCard}>
+        <Text style={styles.progressText}>
+          {doneToday} de {habits.length} hábitos concluídos hoje
+        </Text>
+        <View style={styles.progressTrack}>
+          <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
+        </View>
+      </View>
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
+      <View style={styles.inputRow}>
+        <TextInput
+          style={styles.input}
+          placeholder="Novo hábito (ex.: beber água)"
+          placeholderTextColor="#8b8fa3"
+          value={title}
+          onChangeText={setTitle}
+          onSubmitEditing={addHabit}
+          returnKeyType="done"
+        />
+        <Pressable style={styles.addButton} onPress={addHabit}>
+          <Text style={styles.addButtonText}>Adicionar</Text>
+        </Pressable>
+      </View>
 
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+      <FlatList
+        data={habits}
+        keyExtractor={(habit) => habit.id}
+        contentContainerStyle={styles.list}
+        ListEmptyComponent={
+          <Text style={styles.emptyText}>Nenhum hábito ainda. Adicione o primeiro acima.</Text>
+        }
+        renderItem={({ item }) => {
+          const isDone = item.completedDates.includes(today);
+          return (
+            <Pressable
+              style={[styles.habitItem, isDone && styles.habitItemDone]}
+              onPress={() => toggleHabit(item.id)}
+            >
+              <Text style={styles.habitCheck}>{isDone ? '✓' : '○'}</Text>
+              <Text style={[styles.habitTitle, isDone && styles.habitTitleDone]}>
+                {item.title}
+              </Text>
+            </Pressable>
+          );
+        }}
+      />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+    backgroundColor: '#12131a',
+    paddingHorizontal: 20,
   },
   title: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#ffffff',
+    marginTop: 12,
+    marginBottom: 16,
+  },
+  progressCard: {
+    backgroundColor: '#1d1f2b',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+  },
+  progressText: {
+    color: '#d6d8e6',
+    marginBottom: 10,
+  },
+  progressTrack: {
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#2c2f40',
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#7c5cff',
+  },
+  inputRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 16,
+  },
+  input: {
+    flex: 1,
+    backgroundColor: '#1d1f2b',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    color: '#ffffff',
+  },
+  addButton: {
+    backgroundColor: '#7c5cff',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    justifyContent: 'center',
+  },
+  addButtonText: {
+    color: '#ffffff',
+    fontWeight: '600',
+  },
+  list: {
+    gap: 10,
+    paddingBottom: 24,
+  },
+  emptyText: {
+    color: '#8b8fa3',
     textAlign: 'center',
+    marginTop: 24,
   },
-  code: {
-    textTransform: 'uppercase',
+  habitItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    backgroundColor: '#1d1f2b',
+    borderRadius: 14,
+    padding: 16,
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  habitItemDone: {
+    backgroundColor: '#243a2f',
+  },
+  habitCheck: {
+    color: '#ffffff',
+    fontSize: 18,
+  },
+  habitTitle: {
+    color: '#ffffff',
+    fontSize: 16,
+    flexShrink: 1,
+  },
+  habitTitleDone: {
+    color: '#9fd8b4',
+    textDecorationLine: 'line-through',
   },
 });
