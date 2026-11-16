@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { HabitItem } from '../features/habits/HabitItem';
 import { useHabits } from '../features/habits/useHabits';
 import { toDateKey } from '../lib/date';
 
@@ -62,21 +63,14 @@ export default function HomeScreen() {
             {isLoaded ? 'Nenhum hábito ainda. Adicione o primeiro acima.' : 'Carregando...'}
           </Text>
         }
-        renderItem={({ item }) => {
-          const isDone = item.completedDates.includes(today);
-          return (
-            <Pressable
-              style={[styles.habitItem, isDone && styles.habitItemDone]}
-              onPress={() => toggleHabit(item.id)}
-              onLongPress={() => confirmRemove(item.id, item.title)}
-            >
-              <Text style={styles.habitCheck}>{isDone ? '✓' : '○'}</Text>
-              <Text style={[styles.habitTitle, isDone && styles.habitTitleDone]}>
-                {item.title}
-              </Text>
-            </Pressable>
-          );
-        }}
+        renderItem={({ item }) => (
+          <HabitItem
+            habit={item}
+            today={today}
+            onToggle={() => toggleHabit(item.id)}
+            onLongPress={() => confirmRemove(item.id, item.title)}
+          />
+        )}
       />
     </SafeAreaView>
   );
@@ -146,29 +140,5 @@ const styles = StyleSheet.create({
     color: '#8b8fa3',
     textAlign: 'center',
     marginTop: 24,
-  },
-  habitItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    backgroundColor: '#1d1f2b',
-    borderRadius: 14,
-    padding: 16,
-  },
-  habitItemDone: {
-    backgroundColor: '#243a2f',
-  },
-  habitCheck: {
-    color: '#ffffff',
-    fontSize: 18,
-  },
-  habitTitle: {
-    color: '#ffffff',
-    fontSize: 16,
-    flexShrink: 1,
-  },
-  habitTitleDone: {
-    color: '#9fd8b4',
-    textDecorationLine: 'line-through',
   },
 });
