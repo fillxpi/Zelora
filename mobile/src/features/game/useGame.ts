@@ -3,7 +3,15 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { toDateKey } from '../../lib/date';
 import { DEFAULT_GAME_STATE, loadGameState, saveGameState } from './gameStorage';
 import type { GameState } from './gameTypes';
-import { applyStreakFreezes, FREEZE_COST, getDailyStreak, MAX_FREEZES } from './rules';
+import { getLevelInfo } from './level';
+import {
+  applyStreakFreezes,
+  COINS_PER_COMPLETION,
+  FREEZE_COST,
+  getDailyStreak,
+  MAX_FREEZES,
+  XP_PER_COMPLETION,
+} from './rules';
 
 /**
  * @param activeDates todos os dias em que algum hábito foi concluído
@@ -53,8 +61,18 @@ export function useGame(activeDates: string[], habitsLoaded: boolean) {
     }
   }, [game, gameLoaded]);
 
-  const addCoins = useCallback((amount: number) => {
-    setGame((current) => ({ ...current, coins: Math.max(0, current.coins + amount) }));
+  /**
+   * Chamada quando um hábito é marcado (completed = true) ou desmarcado (completed = false).
+   * Marcar dá moedas e XP; desmarcar devolve, para não dar para "farmar" recompensas.
+   */
+  const registerCompletion = useCallback((completed: boolean) => {
+    const sign = completed ? 1 : -1;
+
+    setGame((current) => ({
+      ...current,
+      coins: Math.max(0, current.coins + sign * COINS_PER_COMPLETION),
+      xp: Math.max(0, current.xp + sign * XP_PER_COMPLETION),
+    }));
   }, []);
 
   const buyFreeze = useCallback(() => {
@@ -68,11 +86,13 @@ export function useGame(activeDates: string[], habitsLoaded: boolean) {
   const canBuyFreeze = game.coins >= FREEZE_COST && game.freezes < MAX_FREEZES;
 
   return {
+    isReady: gameLoaded,
     coins: game.coins,
     freezes: game.freezes,
+    levelInfo: getLevelInfo(game.xp),
     dailyStreak,
     canBuyFreeze,
-    addCoins,
+    registerCompletion,
     buyFreeze,
   };
 }

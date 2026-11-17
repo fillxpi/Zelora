@@ -3,7 +3,7 @@ import { Alert, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'r
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { GameHeader } from '../features/game/GameHeader';
-import { COINS_PER_COMPLETION } from '../features/game/rules';
+import { LevelCard } from '../features/game/LevelCard';
 import { useGame } from '../features/game/useGame';
 import { HabitItem } from '../features/habits/HabitItem';
 import type { Habit } from '../features/habits/types';
@@ -16,10 +16,16 @@ export default function HomeScreen() {
   const today = toDateKey();
 
   const activeDates = habits.flatMap((habit) => habit.completedDates);
-  const { coins, freezes, dailyStreak, canBuyFreeze, addCoins, buyFreeze } = useGame(
-    activeDates,
-    isLoaded,
-  );
+  const {
+    isReady,
+    coins,
+    freezes,
+    levelInfo,
+    dailyStreak,
+    canBuyFreeze,
+    registerCompletion,
+    buyFreeze,
+  } = useGame(activeDates, isLoaded);
 
   const doneToday = habits.filter((habit) => habit.completedDates.includes(today)).length;
   const progress = habits.length === 0 ? 0 : doneToday / habits.length;
@@ -32,8 +38,7 @@ export default function HomeScreen() {
   function handleToggle(habit: Habit) {
     const wasDone = habit.completedDates.includes(today);
     toggleHabit(habit.id);
-    // Concluir ganha moedas; desmarcar devolve, para não dar para "farmar" moedas.
-    addCoins(wasDone ? -COINS_PER_COMPLETION : COINS_PER_COMPLETION);
+    registerCompletion(!wasDone);
   }
 
   function confirmRemove(id: string, habitTitle: string) {
@@ -46,6 +51,8 @@ export default function HomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.title}>Zelora</Text>
+
+      <LevelCard levelInfo={levelInfo} ready={isReady} />
 
       <GameHeader
         streak={dailyStreak}

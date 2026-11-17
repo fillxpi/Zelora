@@ -6,6 +6,7 @@ const STORAGE_KEY = 'zelora:game';
 
 export const DEFAULT_GAME_STATE: GameState = {
   coins: 0,
+  xp: 0,
   freezes: 0,
   frozenDates: [],
   lastCheckedDate: null,
