@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,6 +12,7 @@ import { useHabits } from '../features/habits/useHabits';
 import { toDateKey } from '../lib/date';
 
 export default function HomeScreen() {
+  const router = useRouter();
   const { habits, isLoaded, addHabit, toggleHabit, removeHabit } = useHabits();
   const [title, setTitle] = useState('');
   const today = toDateKey();
@@ -50,7 +52,12 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.title}>Zelora</Text>
+      <View style={styles.headerRow}>
+        <Text style={styles.title}>Zelora</Text>
+        <Pressable style={styles.goalsButton} onPress={() => router.push('/goals')}>
+          <Text style={styles.goalsButtonText}>🎯 Metas</Text>
+        </Pressable>
+      </View>
 
       <LevelCard levelInfo={levelInfo} ready={isReady} />
 
@@ -114,12 +121,27 @@ const styles = StyleSheet.create({
     backgroundColor: '#12131a',
     paddingHorizontal: 20,
   },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 12,
+    marginBottom: 16,
+  },
   title: {
     fontSize: 28,
     fontWeight: '700',
     color: '#ffffff',
-    marginTop: 12,
-    marginBottom: 16,
+  },
+  goalsButton: {
+    backgroundColor: '#1d1f2b',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  goalsButtonText: {
+    color: '#ffffff',
+    fontWeight: '600',
   },
   progressCard: {
     backgroundColor: '#1d1f2b',
