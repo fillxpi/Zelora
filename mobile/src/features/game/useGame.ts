@@ -10,6 +10,8 @@ import {
   FREEZE_COST,
   getDailyStreak,
   MAX_FREEZES,
+  MILESTONE_COINS,
+  MILESTONE_XP,
   XP_PER_COMPLETION,
 } from './rules';
 
@@ -75,6 +77,27 @@ export function useGame(activeDates: string[], habitsLoaded: boolean) {
     }));
   }, []);
 
+  /**
+   * Dá a recompensa dos marcos informados, uma única vez por marco.
+   * Marcos que já foram recompensados são ignorados, então é seguro chamar várias vezes.
+   */
+  const claimMilestones = useCallback((keys: string[]) => {
+    setGame((current) => {
+      const fresh = Array.from(new Set(keys)).filter(
+        (key) => !current.claimedMilestones.includes(key),
+      );
+
+      if (fresh.length === 0) return current;
+
+      return {
+        ...current,
+        claimedMilestones: [...current.claimedMilestones, ...fresh],
+        coins: current.coins + fresh.length * MILESTONE_COINS,
+        xp: current.xp + fresh.length * MILESTONE_XP,
+      };
+    });
+  }, []);
+
   const buyFreeze = useCallback(() => {
     setGame((current) => {
       if (current.coins < FREEZE_COST || current.freezes >= MAX_FREEZES) return current;
@@ -90,9 +113,11 @@ export function useGame(activeDates: string[], habitsLoaded: boolean) {
     coins: game.coins,
     freezes: game.freezes,
     levelInfo: getLevelInfo(game.xp),
+    claimedMilestones: game.claimedMilestones,
     dailyStreak,
     canBuyFreeze,
     registerCompletion,
+    claimMilestones,
     buyFreeze,
   };
 }

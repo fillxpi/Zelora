@@ -3,6 +3,8 @@ import {
   countGoalCompletions,
   createDefaultMilestones,
   getGoalProgress,
+  getReachedMilestones,
+  milestoneKey,
 } from './goalLogic';
 import type { Goal } from './goalTypes';
 
@@ -91,5 +93,48 @@ describe('createDefaultMilestones', () => {
 
     expect(milestones.map((m) => m.requiredCompletions)).toEqual([1, 2, 3]);
     expect(milestones[2].title).toBe('100% da meta');
+  });
+});
+
+describe('milestoneKey', () => {
+  it('junta o id da meta e o id do marco', () => {
+    expect(milestoneKey('g1', '25')).toBe('g1:25');
+  });
+});
+
+describe('getReachedMilestones', () => {
+  const secondGoal: Goal = {
+    id: 'g2',
+    title: 'Calma',
+    habitIds: ['h3'],
+    target: 4,
+    createdAt: '2026-11-10',
+    milestones: createDefaultMilestones(4),
+  };
+
+  it('retorna uma lista vazia quando não há metas', () => {
+    expect(getReachedMilestones([], habits)).toEqual([]);
+  });
+
+  it('retorna só os marcos já atingidos de uma meta', () => {
+    // A meta g1 tem 3 conclusões, então só o marco de 25% (3 conclusões) foi atingido.
+    expect(getReachedMilestones([goal], habits)).toEqual([
+      { key: 'g1:25', goalTitle: 'Rotina de estudos', milestoneTitle: '25% da meta' },
+    ]);
+  });
+
+  it('junta os marcos de várias metas, na ordem das metas', () => {
+    // A meta g2 tem 2 conclusões (h3), então atingiu os marcos de 1 e 2 (25% e 50%).
+    expect(getReachedMilestones([goal, secondGoal], habits).map((m) => m.key)).toEqual([
+      'g1:25',
+      'g2:25',
+      'g2:50',
+    ]);
+  });
+
+  it('não retorna marcos de metas sem progresso', () => {
+    const noProgress = { ...goal, habitIds: ['removido'] };
+
+    expect(getReachedMilestones([noProgress], habits)).toEqual([]);
   });
 });
