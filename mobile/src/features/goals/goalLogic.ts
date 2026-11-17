@@ -67,3 +67,35 @@ export function createDefaultMilestones(target: number): Milestone[] {
     (a, b) => a.requiredCompletions - b.requiredCompletions,
   );
 }
+
+/** Identificador único de um marco dentro de uma meta (usado para dar a recompensa uma vez só). */
+export function milestoneKey(goalId: string, milestoneId: string): string {
+  return `${goalId}:${milestoneId}`;
+}
+
+export type ReachedMilestone = {
+  key: string;
+  goalTitle: string;
+  milestoneTitle: string;
+};
+
+/** Lista todos os marcos já atingidos, de todas as metas, na ordem das metas e dos marcos. */
+export function getReachedMilestones(goals: Goal[], habits: Habit[]): ReachedMilestone[] {
+  const reached: ReachedMilestone[] = [];
+
+  for (const goal of goals) {
+    const progress = getGoalProgress(goal, habits);
+
+    for (const milestone of progress.milestones) {
+      if (milestone.reached) {
+        reached.push({
+          key: milestoneKey(goal.id, milestone.id),
+          goalTitle: goal.title,
+          milestoneTitle: milestone.title,
+        });
+      }
+    }
+  }
+
+  return reached;
+}

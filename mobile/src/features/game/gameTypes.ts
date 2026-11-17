@@ -9,4 +9,6 @@ export type GameState = {
   frozenDates: string[];
   /** Último dia até o qual as proteções já foram verificadas. */
   lastCheckedDate: string | null;
+  /** Marcos de metas que já deram recompensa (formato 'idDaMeta:idDoMarco'). */
+  claimedMilestones: string[];
 };

@@ -10,6 +10,7 @@ export const DEFAULT_GAME_STATE: GameState = {
   freezes: 0,
   frozenDates: [],
   lastCheckedDate: null,
+  claimedMilestones: [],
 };
 
 export async function loadGameState(): Promise<GameState> {

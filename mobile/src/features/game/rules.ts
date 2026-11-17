@@ -4,6 +4,8 @@ import type { GameState } from './gameTypes';
 
 export const COINS_PER_COMPLETION = 10;
 export const XP_PER_COMPLETION = 10;
+export const MILESTONE_COINS = 30;
+export const MILESTONE_XP = 30;
 export const FREEZE_COST = 50;
 export const MAX_FREEZES = 2;
 
