@@ -5,19 +5,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { GameHeader } from '../features/game/GameHeader';
 import { LevelCard } from '../features/game/LevelCard';
-import { useGame } from '../features/game/useGame';
 import { HabitItem } from '../features/habits/HabitItem';
 import type { Habit } from '../features/habits/types';
-import { useHabits } from '../features/habits/useHabits';
 import { toDateKey } from '../lib/date';
+import { useAppState } from '../state/AppStateProvider';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { habits, isLoaded, addHabit, toggleHabit, removeHabit } = useHabits();
-  const [title, setTitle] = useState('');
-  const today = toDateKey();
-
-  const activeDates = habits.flatMap((habit) => habit.completedDates);
+  const { habitsState, gameState } = useAppState();
+  const { habits, isLoaded, addHabit, toggleHabit, removeHabit } = habitsState;
   const {
     isReady,
     coins,
@@ -27,7 +23,10 @@ export default function HomeScreen() {
     canBuyFreeze,
     registerCompletion,
     buyFreeze,
-  } = useGame(activeDates, isLoaded);
+  } = gameState;
+
+  const [title, setTitle] = useState('');
+  const today = toDateKey();
 
   const doneToday = habits.filter((habit) => habit.completedDates.includes(today)).length;
   const progress = habits.length === 0 ? 0 : doneToday / habits.length;

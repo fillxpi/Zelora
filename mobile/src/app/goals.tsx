@@ -1,25 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { GoalCard } from '../features/goals/GoalCard';
 import { getGoalProgress } from '../features/goals/goalLogic';
-import { useGoals } from '../features/goals/useGoals';
-import { loadHabits } from '../features/habits/storage';
-import type { Habit } from '../features/habits/types';
+import { useAppState } from '../state/AppStateProvider';
 
 export default function GoalsScreen() {
-  const { goals, isLoaded, addGoal, removeGoal } = useGoals();
-  const [habits, setHabits] = useState<Habit[]>([]);
+  const { habitsState, goalsState } = useAppState();
+  const { habits } = habitsState;
+  const { goals, isLoaded, addGoal, removeGoal } = goalsState;
 
   const [title, setTitle] = useState('');
   const [target, setTarget] = useState('');
   const [selectedHabitIds, setSelectedHabitIds] = useState<string[]>([]);
-
-  // Esta tela só lê os hábitos (quem altera é a tela inicial).
-  useEffect(() => {
-    loadHabits().then(setHabits);
-  }, []);
 
   function toggleSelected(habitId: string) {
     setSelectedHabitIds((current) =>
