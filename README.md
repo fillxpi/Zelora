@@ -50,9 +50,9 @@ Escaneie o QR code com o Expo Go.
 
 ## Roadmap
 
-- [ ] Setup do projeto e estrutura do repositório
-- [ ] MVP: criar hábitos, marcar como feito, streak e anel de progresso diário
-- [ ] Gamificação: XP, níveis, moedas e proteção de sequência
+- [x] Setup do projeto e estrutura do repositório
+- [x] MVP: criar hábitos, marcar como feito, streak e anel de progresso diário
+- [x] Gamificação: XP, níveis, moedas e proteção de sequência
 - [ ] Metas com marcos e vínculo com hábitos
 - [ ] Recorrência flexível e dias de descanso
 - [ ] Backend com autenticação e sincronização
