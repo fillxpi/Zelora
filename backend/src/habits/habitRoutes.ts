@@ -2,6 +2,7 @@ import { randomUUID } from 'crypto';
 import { Request, Router } from 'express';
 import { z } from 'zod';
 import { AuthRequest, requireAuth } from '../auth/authMiddleware';
+import { isValidDate } from '../lib/dates';
 import { prisma } from '../lib/prisma';
 
 export const habitRouter = Router();
@@ -17,11 +18,6 @@ function currentUserId(req: Request): string {
   return (req as AuthRequest).userId as string;
 }
 
-function isValidDate(value: string): boolean {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  const date = new Date(`${value}T00:00:00Z`);
-  return !Number.isNaN(date.getTime()) && date.toISOString().startsWith(value);
-}
 
 function toApi(habit: { id: string; title: string; completions: { date: string }[] }) {
   return {
