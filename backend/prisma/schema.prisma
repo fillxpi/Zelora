@@ -12,6 +12,7 @@ model User {
   email        String   @unique
   passwordHash String
   createdAt    DateTime @default(now())
+  syncRevision Int      @default(0)
 
   habits            Habit[]
   goals             Goal[]
@@ -24,6 +25,7 @@ model Habit {
   userId String
   id     String
   title  String
+  position Int @default(0)
 
   user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   completions HabitCompletion[]
@@ -48,6 +50,7 @@ model Goal {
   id        String
   title     String
   target    Int
+  position  Int @default(0) 
   /// Formato 'YYYY-MM-DD'
   createdAt String
 

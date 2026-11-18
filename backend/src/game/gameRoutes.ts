@@ -18,7 +18,7 @@ const claimedKey = z
     return parts.length === 2 && parts[0].length > 0 && parts[1].length > 0;
   }, "Use o formato 'idDaMeta:idDoMarco'");
 
-const gameStateSchema = z.object({
+export const gameStateSchema = z.object({
   coins: z.number().int().min(0).max(1_000_000_000),
   xp: z.number().int().min(0).max(1_000_000_000),
   freezes: z.number().int().min(0).max(100),
