@@ -109,7 +109,9 @@ export function useGame(activeDates: string[], habitsLoaded: boolean) {
   const canBuyFreeze = game.coins >= FREEZE_COST && game.freezes < MAX_FREEZES;
 
   return {
-    isReady: gameLoaded,
+        isReady: gameLoaded,
+    game,
+    replaceGame: setGame,
     coins: game.coins,
     freezes: game.freezes,
     levelInfo: getLevelInfo(game.xp),

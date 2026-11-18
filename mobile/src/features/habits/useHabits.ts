@@ -63,5 +63,12 @@ export function useHabits() {
     setHabits((current) => current.filter((habit) => habit.id !== id));
   }, []);
 
-  return { habits, isLoaded, addHabit, toggleHabit, removeHabit };
+    return {
+    habits,
+    isLoaded,
+    addHabit,
+    toggleHabit,
+    removeHabit,
+    replaceHabits: setHabits,
+  };
 }

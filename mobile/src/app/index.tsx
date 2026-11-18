@@ -12,7 +12,7 @@ import { useAppState } from '../state/AppStateProvider';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { habitsState, gameState } = useAppState();
+  const { habitsState, gameState, syncState } = useAppState();
   const { habits, isLoaded, addHabit, toggleHabit, removeHabit } = habitsState;
   const {
     isReady,
@@ -53,9 +53,16 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.headerRow}>
         <Text style={styles.title}>Zelora</Text>
-        <Pressable style={styles.goalsButton} onPress={() => router.push('/goals')}>
-          <Text style={styles.goalsButtonText}>🎯 Metas</Text>
-        </Pressable>
+                <View style={styles.headerButtons}>
+          <Pressable style={styles.goalsButton} onPress={() => router.push('/account')}>
+            <Text style={styles.goalsButtonText}>
+              {syncState.isLoggedIn ? '☁️ Conta' : '👤 Entrar'}
+            </Text>
+          </Pressable>
+          <Pressable style={styles.goalsButton} onPress={() => router.push('/goals')}>
+            <Text style={styles.goalsButtonText}>🎯 Metas</Text>
+          </Pressable>
+        </View>
       </View>
 
       <LevelCard levelInfo={levelInfo} ready={isReady} />
@@ -131,6 +138,10 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '700',
     color: '#ffffff',
+  },
+    headerButtons: {
+    flexDirection: 'row',
+    gap: 8,
   },
   goalsButton: {
     backgroundColor: '#1d1f2b',

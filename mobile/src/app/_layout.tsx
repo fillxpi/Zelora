@@ -14,6 +14,7 @@ export default function RootLayout() {
       >
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="goals" options={{ title: 'Metas' }} />
+        <Stack.Screen name="account" options={{ title: 'Conta' }} />
       </Stack>
     </AppStateProvider>
   );
