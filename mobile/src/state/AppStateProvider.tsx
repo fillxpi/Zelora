@@ -7,11 +7,13 @@ import { useGame } from '../features/game/useGame';
 import { getReachedMilestones } from '../features/goals/goalLogic';
 import { useGoals } from '../features/goals/useGoals';
 import { useHabits } from '../features/habits/useHabits';
+import { useSync } from '../features/sync/useSync';
 
 type AppState = {
   habitsState: ReturnType<typeof useHabits>;
   goalsState: ReturnType<typeof useGoals>;
-  gameState: ReturnType<typeof useGame>;
+    gameState: ReturnType<typeof useGame>;
+  syncState: ReturnType<typeof useSync>;
 };
 
 const AppStateContext = createContext<AppState | null>(null);
@@ -34,6 +36,18 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const { claimedMilestones, claimMilestones } = gameState;
 
   const ready = habitsState.isLoaded && goalsState.isLoaded && gameState.isReady;
+  
+  const syncState = useSync({
+    ready,
+    habits,
+    goals,
+    game: gameState.game,
+    replaceAll: (snapshot) => {
+      habitsState.replaceHabits(snapshot.habits);
+      goalsState.replaceGoals(snapshot.goals);
+      gameState.replaceGame(snapshot.game);
+    },
+  });
 
   // Marcos já anunciados nesta sessão (evita avisar duas vezes antes do estado atualizar).
   const announced = useRef(new Set<string>());
@@ -61,7 +75,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   }, [ready, goals, habits, claimedMilestones, claimMilestones]);
 
   return (
-    <AppStateContext.Provider value={{ habitsState, goalsState, gameState }}>
+        <AppStateContext.Provider value={{ habitsState, goalsState, gameState, syncState }}>
       {children}
     </AppStateContext.Provider>
   );

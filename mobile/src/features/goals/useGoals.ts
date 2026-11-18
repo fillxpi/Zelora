@@ -53,5 +53,5 @@ export function useGoals() {
     setGoals((current) => current.filter((goal) => goal.id !== id));
   }, []);
 
-  return { goals, isLoaded, addGoal, removeGoal };
+    return { goals, isLoaded, addGoal, removeGoal, replaceGoals: setGoals };
 }
