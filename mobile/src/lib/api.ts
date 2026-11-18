@@ -1,6 +1,6 @@
 export const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000';
 
-const TIMEOUT_MS = 10000;
+const TIMEOUT_MS = 60000;
 
 export class ApiError extends Error {
   status: number;
