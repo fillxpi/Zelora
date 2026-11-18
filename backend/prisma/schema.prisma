@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  habits            Habit[]
+  goals             Goal[]
+  gameState         GameState?
+  frozenDates       FrozenDate[]
+  claimedMilestones ClaimedMilestone[]
+}
+
+model Habit {
+  userId String
+  id     String
+  title  String
+
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  completions HabitCompletion[]
+  goalLinks   GoalHabit[]
+
+  @@id([userId, id])
+}
+
+model HabitCompletion {
+  userId  String
+  habitId String
+  /// Formato 'YYYY-MM-DD'
+  date    String
+
+  habit Habit @relation(fields: [userId, habitId], references: [userId, id], onDelete: Cascade)
+
+  @@id([userId, habitId, date])
+}
+
+model Goal {
+  userId    String
+  id        String
+  title     String
+  target    Int
+  /// Formato 'YYYY-MM-DD'
+  createdAt String
+
+  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  milestones Milestone[]
+  habitLinks GoalHabit[]
+
+  @@id([userId, id])
+}
+
+model GoalHabit {
+  userId  String
+  goalId  String
+  habitId String
+
+  goal  Goal  @relation(fields: [userId, goalId], references: [userId, id], onDelete: Cascade)
+  habit Habit @relation(fields: [userId, habitId], references: [userId, id], onDelete: Cascade)
+
+  @@id([userId, goalId, habitId])
+}
+
+model Milestone {
+  userId              String
+  goalId              String
+  id                  String
+  title               String
+  requiredCompletions Int
+
+  goal Goal @relation(fields: [userId, goalId], references: [userId, id], onDelete: Cascade)
+
+  @@id([userId, goalId, id])
+}
+
+model GameState {
+  userId          String  @id
+  coins           Int     @default(0)
+  xp              Int     @default(0)
+  freezes         Int     @default(0)
+  /// Formato 'YYYY-MM-DD'
+  lastCheckedDate String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model FrozenDate {
+  userId String
+  /// Formato 'YYYY-MM-DD'
+  date   String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, date])
+}
+
+model ClaimedMilestone {
+  userId      String
+  goalId      String
+  milestoneId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, goalId, milestoneId])
+}

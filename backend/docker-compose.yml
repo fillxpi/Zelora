@@ -1,0 +1,15 @@
+services:
+  db:
+    image: postgres:16
+    container_name: zelora-db
+    environment:
+      POSTGRES_USER: zelora
+      POSTGRES_PASSWORD: zelora
+      POSTGRES_DB: zelora
+    ports:
+      - "5433:5432"
+    volumes:
+      - zelora-pgdata:/var/lib/postgresql/data
+
+volumes:
+  zelora-pgdata:
